@@ -4,68 +4,30 @@ using UnityEngine;
 
 public class SpawnManagerX : MonoBehaviour
 {
-    public GameObject enemyPrefab;
-    public GameObject powerupPrefab;
+    public GameObject[] ballPrefabs;
 
-    private float spawnRangeX = 10;
-    private float spawnZMin = 15; // set min spawn Z
-    private float spawnZMax = 25; // set max spawn Z
+    private float spawnLimitXLeft = -22;
+    private float spawnLimitXRight = 7;
+    private float spawnPosY = 30;
 
-    public int enemyCount;
-    public int waveCount = 1;
+    private float startDelay = 1.0f;
+    private float spawnInterval = 4.0f;
 
-
-    public GameObject player; 
-
-    // Update is called once per frame
-    void Update()
+    // Start is called before the first frame update
+    void Start()
     {
-        enemyCount = GameObject.FindGameObjectsWithTag("Enemy").Length;
-
-        if (enemyCount == 0)
-        {
-            SpawnEnemyWave(waveCount);
-        }
-
+        InvokeRepeating("SpawnRandomBall", startDelay, spawnInterval);
     }
 
-    // Generate random spawn position for powerups and enemy balls
-    Vector3 GenerateSpawnPosition ()
+    // Spawn random ball at random x position at top of play area
+    void SpawnRandomBall ()
     {
-        float xPos = Random.Range(-spawnRangeX, spawnRangeX);
-        float zPos = Random.Range(spawnZMin, spawnZMax);
-        return new Vector3(xPos, 0, zPos);
-    }
+        // Generate random ball index and random spawn position
+        int ballIndex = Random.Range(0, ballPrefabs.Length);
+        Vector3 spawnPos = new Vector3(Random.Range(spawnLimitXLeft, spawnLimitXRight), spawnPosY, 0);
 
-
-    void SpawnEnemyWave(int enemiesToSpawn)
-    {
-        Vector3 powerupSpawnOffset = new Vector3(0, 0, -15); // make powerups spawn at player end
-
-        // If no powerups remain, spawn a powerup
-        if (GameObject.FindGameObjectsWithTag("Powerup").Length == 0) // check that there are zero powerups
-        {
-            Instantiate(powerupPrefab, GenerateSpawnPosition() + powerupSpawnOffset, powerupPrefab.transform.rotation);
-        }
-
-        // Spawn number of enemy balls based on wave number
-        for (int i = 0; i < enemiesToSpawn; i++)
-        {
-            Instantiate(enemyPrefab, GenerateSpawnPosition(), enemyPrefab.transform.rotation);
-        }
-
-        waveCount++;
-        ResetPlayerPosition(); // put player back at start
-
-    }
-
-    // Move player back to position in front of own goal
-    void ResetPlayerPosition ()
-    {
-        player.transform.position = new Vector3(0, 1, -7);
-        player.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        player.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-
+        // instantiate ball at random spawn location
+        Instantiate(ballPrefabs[ballIndex], spawnPos, ballPrefabs[ballIndex].transform.rotation);
     }
 
 }
